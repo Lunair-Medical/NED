@@ -20,11 +20,9 @@ LabChartRaw<-read.csv("Data/NEDPracticeBreath1.csv", header=FALSE)
 
 #define the x and y values
 data_step=0.0005
-x<-length(LabChartRaw$V1)*data_step
 y<-LabChartRaw$V1
 
 #making an empty array to hold the area of each trapezoid
-#random
 areas<-vector(mode="numeric",length=length(LabChartRaw$V1)-1)
 
 #finding the area of each trapezoid
