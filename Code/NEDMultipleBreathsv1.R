@@ -35,25 +35,76 @@ allbreathareas<-vector(mode="numeric",length=length(inspendindices))
 
 #a for loop that will integrate from inspstart to inspend for the number of breaths selected
 for(i in 1:length(inspstartindices)){
-  inspstarti<-inspstartindices[i]
-  inspendi<-inspendindices[i]
-  starttime<-allNEDbreaths$`ChannelTitle=`[inspstarti]
-  endtime<-allNEDbreaths$`ChannelTitle=`[inspendi]
-  areas<-vector(mode="numeric",length=length(inspendi-inspstarti)-1)
+  #finding the breath that we are working on - we find the start and end index of this breath and then the times for those
+  start<-inspstartindices[i]
+  end<-inspendindices[i]
   
-   for(j in inspstarti+1:inspendi){
+  #defining the breath 
+  breath=allNEDbreaths$`Flow Sensor Total`[start:end]
+  
+  #finding the two local maximums and their indices
+  vmax1=max(breath[1:floor(length(breath)/2)])
+  vmax1index = which(breath[1:floor(length(breath)/2)]==vmax1)
+  vmax2=max(breath[floor(length(breath)/2):floor(length(breath))])
+  vmax2index = which(breath[floor(length(breath)/2):floor(length(breath))]==vmax2)
+  
+  #making empty arrays to hold the areas
+  midptNEDareas<-vector(mode="numeric",length=(end-start))
+  leftareas<-vector(mode="numeric", length=vmax1index)
+  rightareas<-vector(mode="numeric", length=(length(breath)-vmax2index)
+  
+  #looping over the individual breath i to find midpt NED area
+   for(j in 1:length(breath)-1){
      #get the two values of y 
-     base1=allNEDbreaths$`Flow Sensor Total`[j-1]
-     base2=allNEDbreaths$`Flow Sensor Total`[j]
-     
-     #value of x is always the same, step_x
-     
+     base1=breath[j]
+     base2=breath[j+1]
+    
      #calculate the area:
-     area = 1/2 * (base1 + base2) * data_step #trapezoidal area formula
+     midpt = (base2+base1)/2
+     midptNEDarea = midpt * data_step #midpt area formula
      
      #store it in the array
-     area->areas[i-1]
+     midptNEDarea->midptNEDareas[j]
    }
-  #after this, I think we would want to store the sum of the areas in another vector
-  sum(areas)->allbreathareas[i]
+ 
+   #store the sum of the NED midpoint areas in another vector
+  sum(midptNEDareas)->allbreathareas[i]
+  
+  #looping over the individual breath i to find rectangle non-NED area
+  #integrating the first segment with a midpt sum
+  for(k in 1:vmax1index-1){
+    #get the two values of y 
+    base1=breath[k]
+    base2=breath[k+1]
+   
+    #calculate the area:
+    midptL = (base2+base1)/2
+    leftrect = midptL * data_step #midpt area formula
+    
+    #store it in the array
+    leftrect->leftareas[k]
+  }
+  leftsum<-sum(leftareas)
+  
+  #multiplying the middle rectangle
+    middlearea = (vmax2index-vmax1index)*data_step*vmax1
+  
+  #integrating the last segment with a trap sum
+  for (m in vmax2index:length(breath)-1){
+    #get the two values of y 
+    base1=breath[m]
+    base2=breath[m+1]
+    
+    #calculate the area:
+    midptR = (base2+base1)/2
+    rightrect = midptR * data_step #midpt area formula
+    
+    #store it in the array
+    rightrect->rightareas[m]
+  }
+    rightsum<-sum(rightareas)
+    
+    TVnonNED<-leftsum+middlearea+rightsum
+    
+    TVNED <-sum(allbreathareas)
 }
