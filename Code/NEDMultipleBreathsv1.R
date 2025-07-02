@@ -1,26 +1,37 @@
 ## the purpose of this script is to be able to look through waveform data that has insp starts and ends marked and have the program integrate between the insp markings it finds
 #originally created by Grace Burkholder 01 July 2025
 
+rm(list=ls())
+
+library(tidyverse)
+library(janitor)
+
 #read in the CSV file with selected columns
 allNEDbreaths<-read.csv("data/NEDPractice5Breaths.csv", header=FALSE)
 
-data_step<-0.0005
-
-#make the header and remove automatic header rows
+#make the header and remove automatic header rows and convert to numeric
 colnames(allNEDbreaths)<-as.character(unlist(allNEDbreaths[5, ]))
-
 allNEDbreaths<-allNEDbreaths[-(1:9), ]
+clean_names(allNEDbreaths)
+
+data_step<-0.0005
 
 
 ##keep only the columns we want
 cols_to_keep <- c("ChannelTitle=", "Flow Sensor Nose", "Flow Sensor Mouth", "Flow Sensor Total", "Tidal Volume Total", "Comments")
 allNEDbreaths <- allNEDbreaths[, cols_to_keep]
 
+allNEDbreaths %>% 
+  mutate(across(c(1:5),as.numeric))->allNEDbreaths
+
 #find all the inspstart and inspend indices
 inspstartindices<-which(grepl("InspStart", allNEDbreaths$Comments))
 inspendindices<-which(grepl("InspEnd", allNEDbreaths$Comments))
 
 data_step<-0.0005
+
+#making an array to hold the area of each of the breaths
+allbreathareas<-vector(mode="numeric",length=length(inspendindices))
 
 #a for loop that will integrate from inspstart to inspend for the number of breaths selected
 for(i in 1:length(inspstartindices)){
@@ -42,5 +53,7 @@ for(i in 1:length(inspstartindices)){
      
      #store it in the array
      area->areas[i-1]
-  }
+   }
+  #after this, I think we would want to store the sum of the areas in another vector
+  sum(areas)->allbreathareas[i]
 }
