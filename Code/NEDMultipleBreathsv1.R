@@ -7,18 +7,40 @@ allNEDbreaths<-read.csv("data/NEDPractice5Breaths.csv", header=FALSE)
 data_step<-0.0005
 
 #make the header and remove automatic header rows
-colnames(allNEDbreaths)<-as.character(unlist(allNEDbreaths[4, ]))
+colnames(allNEDbreaths)<-as.character(unlist(allNEDbreaths[5, ]))
 
-#allNEDbreaths<-allNEDbreaths[-(1:8), ]
+allNEDbreaths<-allNEDbreaths[-(1:9), ]
+
 
 ##keep only the columns we want
-#allNEDbreaths <- subset(allNEDbreaths, select = c(ChannelTitle=, Flow Sensor Nose, Flow Sensor Mouth, Flow Sensor Total, Tidal Volume Total, Comments))
-#cols_to_keep <- c("ChannelTitle=", "Flow Sensor Nose", "Flow Sensor Mouth", "Flow Sensor Total", "Tidal Volume Total", "Comments")
-#allNEDbreaths <- allNEDbreaths[, cols_to_keep]
+cols_to_keep <- c("ChannelTitle=", "Flow Sensor Nose", "Flow Sensor Mouth", "Flow Sensor Total", "Tidal Volume Total", "Comments")
+allNEDbreaths <- allNEDbreaths[, cols_to_keep]
 
-#NEDbreathsColsWeWant <- select(allNEDbreaths, , N2, N3, REM)
+#find all the inspstart and inspend indices
+inspstartindices<-which(grepl("InspStart", allNEDbreaths$Comments))
+inspendindices<-which(grepl("InspEnd", allNEDbreaths$Comments))
 
+data_step<-0.0005
 
-
-
-## comment as of July 01 afternoon: So I had the first part of the code working and it was naming the columns correctly and removing the headers, but I tried to filter columns and now the first part of the script is being weird so pick up here tomorrow.
+#a for loop that will integrate from inspstart to inspend for the number of breaths selected
+for(i in 1:length(inspstartindices)){
+  inspstarti<-inspstartindices[i]
+  inspendi<-inspendindices[i]
+  starttime<-allNEDbreaths$`ChannelTitle=`[inspstarti]
+  endtime<-allNEDbreaths$`ChannelTitle=`[inspendi]
+  areas<-vector(mode="numeric",length=length(inspendi-inspstarti)-1)
+  
+   for(j in inspstarti+1:inspendi){
+     #get the two values of y 
+     base1=allNEDbreaths$`Flow Sensor Total`[j-1]
+     base2=allNEDbreaths$`Flow Sensor Total`[j]
+     
+     #value of x is always the same, step_x
+     
+     #calculate the area:
+     area = 1/2 * (base1 + base2) * data_step #trapezoidal area formula
+     
+     #store it in the array
+     area->areas[i-1]
+  }
+}
