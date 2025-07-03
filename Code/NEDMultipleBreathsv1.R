@@ -5,6 +5,7 @@ rm(list=ls())
 
 library(tidyverse)
 library(janitor)
+library(gridExtra)
 
 
 #graphic settings
@@ -137,6 +138,7 @@ for(i in 1:length(inspstartindices)){
 ##comparing NED and nonNED breaths
 
 percentNEDoverIdeal<-(allNEDbreathareas/allregbreathareas)*100
+breaths<-1:20
 
 
 #plot the waveform to see the breaths
@@ -148,3 +150,9 @@ NEDPlot<-ggplot(data = allNEDbreaths, aes(x=time, y=flow))+
   theme_lunair()
 NEDPlot
 
+#create a table
+finalarray<-rbind(breaths,percentNEDoverIdeal)
+finaltable<-as.data.frame(finalarray)
+print(finaltable)
+table_plot <- tableGrob(finaltable)
+ggsave("finaltable.png", table_plot, width = 35, height = 4)
