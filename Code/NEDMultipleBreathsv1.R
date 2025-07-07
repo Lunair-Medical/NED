@@ -137,8 +137,9 @@ for(i in 1:length(inspstartindices)){
 
 ##comparing NED and nonNED breaths
 
-percentNEDoverIdeal<-(allNEDbreathareas/allregbreathareas)*100
-breaths<-1:20
+percentNEDoverIdeal<-100-(allNEDbreathareas/allregbreathareas)*100
+roundedpercentNEDoverIdeal<-round(percentNEDoverIdeal, digits=4)
+robreaths<-1:20
 
 
 #plot the waveform to see the breaths
@@ -151,8 +152,9 @@ NEDPlot<-ggplot(data = allNEDbreaths, aes(x=time, y=flow))+
 NEDPlot
 
 #create a table
-finalarray<-rbind(breaths,percentNEDoverIdeal)
+finalarray<-rbind(breaths,roundedpercentNEDoverIdeal)
 finaltable<-as.data.frame(finalarray)
-print(finaltable)
-table_plot <- tableGrob(finaltable)
-ggsave("finaltable.png", table_plot, width = 35, height = 4)
+verticaltable<-t(finaltable)
+print(verticaltable)
+table_plot <- tableGrob(verticaltable)
+ggsave("finaltable.png", table_plot, width = 4, height =8)
