@@ -112,9 +112,9 @@ for(i in 1:length(inspstartindices)){
   leftsum<-sum(leftareas)
   
   #multiplying the middle rectangle
-    middlearea = (vmax2index-vmax1index)*data_step*vmax1
+    middlearea = (vmax2index-vmax1index)*data_step*vmax1 #would we want to use the larger of Vmax1 or 2 here, or always Vmax1
   
-  #integrating the last segment with a trap sum
+  #integrating the last segment with a midpt sum
   for(m in 1:(length(breath)-vmax2index-1)){
     #get the two values of y 
     base1=breath[m]
@@ -131,7 +131,7 @@ for(i in 1:length(inspstartindices)){
     
     #summing the left, middle, and right and storing that value in the array for each i
     TVnonNED<-leftsum+middlearea+rightsum
-    sum(TVnonNED)->allregbreathareas[i]
+    TVnonNED->allregbreathareas[i]
     
 }
 
@@ -139,14 +139,12 @@ for(i in 1:length(inspstartindices)){
 
 percentNEDoverIdeal<-100-(allNEDbreathareas/allregbreathareas)*100
 roundedpercentNEDoverIdeal<-round(percentNEDoverIdeal, digits=4)
-robreaths<-1:20
+breaths<-1:20
 
 
 #plot the waveform to see the breaths
 
-time=allNEDbreaths$`ChannelTitle=`
-flow=allNEDbreaths$`Flow Sensor Total`
-NEDPlot<-ggplot(data = allNEDbreaths, aes(x=time, y=flow))+
+NEDPlot<-ggplot(data = allNEDbreaths, aes(x=`ChannelTitle=`, y=`Flow Sensor Total`))+
   geom_line(color=lunair_palette[2], linewidth=0.25)+
   theme_lunair()
 NEDPlot
